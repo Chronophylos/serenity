@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
+use crate::internal::prelude::*;
 use crate::json::{from_number, Value};
+use crate::model::id::ForumTagId;
 
 #[derive(Debug, Clone, Default)]
 pub struct EditThread(pub HashMap<&'static str, Value>);
@@ -45,6 +47,23 @@ impl EditThread {
     /// **Note**: Only available on private threads.
     pub fn invitable(&mut self, invitable: bool) -> &mut Self {
         self.0.insert("invitable", Value::from(invitable));
+
+        self
+    }
+
+    /// Set the list of applied tags.
+    ///
+    /// **Note**: Limted to 5; Only available in forum threads.
+    pub fn set_applied_tags(&mut self, tags: Vec<ForumTagId>) -> &mut Self {
+        let mut applied_tags = Value::from(Vec::<Value>::new());
+        let applied_tags_array =
+            applied_tags.as_array_mut().expect("applied_tags must be an array");
+
+        for tag in tags {
+            applied_tags_array.push(Value::from(tag.to_string()));
+        }
+
+        self.0.insert("applied_tags", applied_tags);
 
         self
     }
